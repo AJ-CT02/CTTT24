@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Happy Birthday!</title>
+<style>
+  @import url('https://fonts.googleapis.com/css?family=Kaushan+Script');
+  @import url("https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&family=Quicksand:wght@300..700&display=swap");
+
+  html, body { height: 100%; margin: 0; }
+  body {
+    overflow: hidden;
+    font-family: 'Kaushan Script', cursive;
+    background: linear-gradient(to bottom, #190e14, #0d0d4b 30%, #c76075 80%, #e9b64b 95%);
+    background: radial-gradient(circle at center bottom, #e9b64b, #c76075 15%, #0d0d4b 75%, #190e14 90%);
+  }
+
+  /* ---------- Sao ---------- */
+  .star {
+    position: absolute; background: #fff; border-radius: 50%;
+    animation: twinkle 3s ease-in-out infinite;
+  }
+  @keyframes twinkle { 50% { opacity: .2; } }
+
+  /* ---------- Mặt trăng ---------- */
+  .moon {
+    position: absolute; top: 8%; right: 12%;
+    width: 100px; height: 100px; border-radius: 50%;
+    background: #ddd; box-shadow: inset 20px -10px 0 0 #b9b9b9;
+  }
+  .moon div { position: absolute; border-radius: 50%; background: #bbb; }
+  .moon .c1 { width: 30px; height: 30px; top: 20px; right: 20px; box-shadow: inset -3px 1.5px 0 0 #aaa; }
+  .moon .c2 { width: 10px; height: 10px; top: 45px; right: 50px; box-shadow: inset -1px .5px 0 0 #aaa; }
+  .moon .c3 { width: 15px; height: 15px; top: 60px; right: 25px; box-shadow: inset -1.5px .75px 0 0 #aaa; }
+
+  /* ---------- Biển ---------- */
+  #sea {
+    position: absolute; left: 0; bottom: 0; width: 100%; height: 85px;
+    background: radial-gradient(circle at center top, #23485a, #0d0246);
+  }
+
+  canvas { position: absolute; top: 0; left: 0; pointer-events: none; }
+  #fx { z-index: 1; }
+  #text { z-index: 2; }
+
+  /* ---------- Hộp quà ---------- */
+  .gift-wrap {
+    position: absolute; inset: 0; z-index: 10;
+    transition: opacity .6s ease;
+  }
+  .gift-wrap.gone { opacity: 0; pointer-events: none; }
+
+  .giftbox {
+    position: absolute; width: 300px; height: 200px;
+    left: 50%; margin-left: -150px; bottom: 120px;
+    cursor: pointer;
+  }
+  .giftbox > div { position: absolute; background: #34495e; }
+  .giftbox:after {
+    position: absolute; content: "Click Me!"; color: #fff;
+    width: 100%; left: 0; bottom: 0; font-size: 28px; text-align: center;
+    transform: rotate(-20deg); transform-origin: 0 0;
+    text-shadow: 0 0 10px rgba(255,255,255,.6);
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes pulse { 50% { opacity: .5; } }
+
+  .cover { width: 100%; top: 0; left: 0; height: 25%; z-index: 2; }
+  .cover:before {
+    content: ""; position: absolute; top: 0; height: 100%; left: 50%;
+    width: 50px; transform: translateX(-50%); background: #fdc56d;
+  }
+  .cover > div {
+    position: absolute; width: 50px; height: 50px;
+    left: 50%; top: -50px; transform: translateX(-50%); background: none;
+  }
+  .cover > div:before, .cover > div:after {
+    content: ""; position: absolute; left: 0; top: 0; width: 100%; height: 100%;
+    box-shadow: inset 0 0 0 15px #fdc56d; border-radius: 30px; transform-origin: 50% 100%;
+  }
+  .cover > div:before { transform: translateX(-45%) skewY(40deg); }
+  .cover > div:after  { transform: translateX(45%) skewY(-40deg); }
+
+  .box { right: 5%; left: 5%; height: 80%; bottom: 0; }
+  .box:before {
+    content: ""; position: absolute; top: 0; width: 50px; height: 100%;
+    left: 50%; transform: translateX(-50%); background: #fdc56d;
+  }
+  .box:after {
+    content: ""; position: absolute; top: 0; width: 100%; height: 30px;
+    background: rgba(0,0,0,.2);
+  }
+
+  /* Hiệu ứng khi click */
+  .giftbox.wobble { animation: wobble .5s linear infinite; }
+  .giftbox.wobble .cover { animation: wobble .5s linear infinite .1s; }
+  .giftbox.wobble:after, .giftbox.open:after { opacity: 0; animation: none; }
+  .giftbox.open .cover { animation: flyUp .5s ease-in forwards; }
+  .giftbox.open .box   { animation: flyDown .3s ease-in .05s forwards; }
+
+  @keyframes wobble { 25% { transform: rotate(4deg); } 75% { transform: rotate(-2deg); } }
+  @keyframes flyUp   { 75% { opacity: 1; } 100% { transform: translateY(-1000px) rotate(20deg); opacity: 0; } }
+  @keyframes flyDown { 75% { opacity: 1; } 100% { transform: translateY(100%); opacity: 0; } }
+
+  /* ---------- Trang 3: Phong bì + bài thơ ---------- */
+  #scene3 {
+    position: fixed; inset: 0; z-index: 50;
+    display: flex; justify-content: center; align-items: center;
+    background: rgb(148, 141, 141); 
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity 1.2s ease, visibility 0s linear 1.2s;
+  }
+  #scene3.show {
+    opacity: 1; visibility: visible; pointer-events: auto;
+    transition: opacity 1.2s ease;
+  }
+  #scene3 .container { position: relative; width: 300px; height: 200px; transform-origin: center; }
+  .valentines { position: relative; top: 50px; cursor: pointer; animation: up 3s linear infinite; }
+  .envelope { position: relative; width: 300px; height: 200px; background-color: #f1b234; }
+  .envelope:before {
+    background-color: pink; content: ""; position: absolute;
+    width: 212px; height: 212px; transform: rotate(45deg);
+    top: -105px; left: 44px; border-radius: 30px 0 0 0;
+  }
+  .card {
+    position: absolute; background-color: #eae2b7; overflow: hidden;
+    width: 270px; height: 170px; top: 5px; left: 15px;
+    box-shadow: -5px -5px 100px rgba(0,0,0,.4);
+    transition: top .7s ease, height .7s ease;
+  }
+  .card:before {
+    content: ""; position: absolute; inset: 4px;
+    border: 3px dotted #4883d9; pointer-events: none;
+  }
+  .container.open .card { top: -330px; height: 350px; }
+  .card .text {
+    position: absolute; top: 14px; left: 14px; right: 14px;
+    font-family: 'Brush Script MT', 'Kaushan Script', cursive;
+    font-size: 13px; text-align: center; line-height: 18px; color: #04007f;
+  }
+  .front {
+    position: absolute; border-right: 180px solid pink;
+    border-top: 95px solid transparent; border-bottom: 100px solid transparent;
+    left: 120px; top: 5px; width: 0; height: 0; z-index: 10;
+  }
+  .front:before {
+    position: absolute; content: ""; border-left: 300px solid pink;
+    border-top: 195px solid transparent; left: -120px; top: -95px; width: 0; height: 0;
+  }
+  .shadow {
+    position: absolute; width: 330px; height: 25px; border-radius: 50%;
+    background-color: rgba(0,0,0,.3); top: 265px; left: -15px;
+    animation: scaleShadow 3s linear infinite; z-index: -1;
+  }
+  @keyframes up { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-30px); } }
+  @keyframes scaleShadow { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(.85); } }
+  .hearts { position: absolute; }
+  .hearts div {
+    background-color: red; display: inline-block; height: 10px; width: 10px;
+    margin: 0 10px; position: relative; top: 50px; transform: rotate(-45deg);
+  }
+  .hearts div:before, .hearts div:after {
+    content: ""; background-color: red; border-radius: 50%;
+    height: 10px; width: 10px; position: absolute;
+  }
+  .hearts div:before { top: -5px; left: 0; }
+  .hearts div:after  { left: 5px; top: 0; }
+  .hearts .one   { left: 10px; animation: heart 1s ease-out infinite; }
+  .hearts .two   { left: 30px; animation: heart 2s ease-out infinite; }
+  .hearts .three { left: 50px; animation: heart 1.5s ease-out infinite; }
+  .hearts .four  { left: 70px; animation: heart 2.3s ease-out infinite; }
+  .hearts .five  { left: 90px; animation: heart 1.7s ease-out infinite; }
+  @keyframes heart {
+    0%   { transform: translateY(0) rotate(-45deg) scale(.3); opacity: 1; }
+    100% { transform: translateY(-150px) rotate(-45deg) scale(1.3); opacity: .5; }
+  }
+  .hint {
+    position: absolute; left: 0; right: 0; bottom: 68px; text-align: center;
+    color: #f5d9a8; font-size: 18px; opacity: .8;
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+
+  /* Dòng "Chưa hết đâu" ở trang thư */
+  .more {
+    position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%);
+    background: none; border: 0; cursor: pointer; white-space: nowrap;
+    font-family: 'Kaushan Script', cursive; font-size: 24px; color: #ffd27a;
+    text-shadow: 0 0 10px rgba(255,193,111,.8), 0 0 22px rgba(247,101,145,.6);
+    animation: moreGlow 1.8s ease-in-out infinite;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .more:hover { color: #fff; }
+  @keyframes moreGlow { 50% { opacity: .55; } }
+
+  /* ---------- Trang 4: ảnh xếp chồng + lời chúc ---------- */
+  #scene4 {
+    position: fixed; inset: 0; z-index: 60; overflow-y: auto;
+    background: linear-gradient(145deg, #55566a 0%, #131318 76%);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity 1.2s ease, visibility 0s linear 1.2s;
+  }
+  #scene4.show {
+    opacity: 1; visibility: visible; pointer-events: auto;
+    transition: opacity 1.2s ease;
+  }
+  #scene4 *, #scene4 *:before, #scene4 *:after {
+    margin: 0; padding: 0; box-sizing: border-box;
+    font-family: "Quicksand", sans-serif;
+  }
+  /* Nền đổi theo ảnh đang hiển thị (ảnh làm mờ) */
+  #scene4 .bg {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-size: cover; background-position: center;
+    filter: blur(15px) brightness(.5) saturate(1.2);
+    transform: scale(1.25);
+    opacity: 0; transition: opacity 1.2s ease;
+  }
+  #scene4 .bg.on { opacity: 1; }
+  #scene4 main {
+    position: relative; z-index: 1;
+    display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr;
+    place-items: center; min-height: 100vh; min-height: 100dvh;
+  }
+  #scene4 .content { padding-left: 120px; color: #c7c7c7c9; user-select: none; }
+  #scene4 .content h1 {
+    font-family: "Dancing Script", cursive;
+    font-size: clamp(2.5rem, 4vw, 6rem); font-weight: 700;
+    background: -webkit-linear-gradient(0deg, #f76591, #ffc16f);
+    background-clip: text; -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1.1; margin-bottom: 36px; padding-left: 10px;
+  }
+  #scene4 .content p {
+    font-size: clamp(0.9rem, 4vw, 1.2rem); line-height: 1.6; padding-right: 100px;
+  }
+  #scene4 .btn {
+    background-color: #f76591;
+    background-image: linear-gradient(-180deg, #ffc16f, #f76591);
+    font-size: clamp(0.8rem, 8vw, 0.9rem); font-weight: 600; color: #fff;
+    width: max-content; outline: 0; border: 0; border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,.1); padding: 10px 20px; margin-top: 26px;
+    text-align: center; transform: scale(1); transition: all .2s ease-in;
+    cursor: pointer; touch-action: manipulation; user-select: none;
+    -webkit-user-select: none; pointer-events: auto;
+  }
+  #scene4 .btn:hover { box-shadow: 0 4px 10px rgba(247,101,145,.5); transform: scale(.98); }
+
+  #scene4 .stack { position: relative; isolation: isolate; }
+  #scene4 .pcard {
+    position: absolute; transform: translate(-50%, -50%); top: 50%; left: 50%;
+    width: 350px; height: 500px; border-radius: 2rem;
+    box-shadow: 0 5px 10px 0 rgba(0,0,0,.25), 0 15px 20px 0 rgba(0,0,0,.125);
+    transition: transform .6s; user-select: none;
+  }
+  #scene4 .pcard img {
+    display: block; width: 100%; height: 100%; border-radius: inherit;
+    object-fit: cover; pointer-events: none;
+  }
+  #scene4 .pcard:nth-last-child(n + 5) {
+    --x: calc(-50% + 90px);
+    transform: translate(var(--x), -50%) scale(.85);
+    box-shadow: 0 0 1px 1px rgba(0,0,0,.01);
+  }
+  #scene4 .pcard:nth-last-child(4) { --x: calc(-50% + 60px); transform: translate(var(--x), -50%) scale(.9); }
+  #scene4 .pcard:nth-last-child(3) { --x: calc(-50% + 30px); transform: translate(var(--x), -50%) scale(.95); }
+  #scene4 .pcard:nth-last-child(2) { --x: calc(-50%); transform: translate(var(--x), -50%) scale(1); }
+  #scene4 .pcard:nth-last-child(1) { --x: calc(-50% - 30px); transform: translate(var(--x), -50%) scale(1.05); cursor: pointer; }
+  #scene4 .pcard:nth-last-child(1) img { box-shadow: 0 1px 5px 5px rgba(255,193,111,.5); }
+  #scene4 .swap { animation: swap 1.3s ease-out forwards; }
+
+  @keyframes swap {
+    30% { transform: translate(calc(var(--x) - 250px), -50%) scale(.85) rotate(-5deg) rotateY(65deg); }
+    100% { transform: translate(calc(var(--x) - 30px), -50%) scale(.5); z-index: -1; }
+  }
+  @media (max-width: 1200px) {
+    @keyframes swap {
+      30% { transform: translate(calc(var(--x) - 200px), -50%) scale(.85) rotate(-5deg) rotateY(65deg); }
+      100% { transform: translate(calc(var(--x) - 30px), -50%) scale(.5); z-index: -1; }
+    }
+  }
+  @media (max-width: 1050px) {
+    @keyframes swap {
+      30% { transform: translate(calc(var(--x) - 150px), -50%) scale(.85) rotate(-5deg) rotateY(65deg); }
+      100% { transform: translate(calc(var(--x) - 30px), -50%) scale(.5); z-index: -1; }
+    }
+  }
+  @media (max-width: 1200px) {
+    #scene4 .content { padding-left: 80px; }
+    #scene4 .content p { padding-right: 40px; }
+    #scene4 .pcard { width: 250px; height: 380px; }
+  }
+  @media (max-width: 1050px) {
+    #scene4 .content { padding-left: 60px; }
+    #scene4 .content p { line-height: 1.5; }
+    #scene4 .pcard { width: 220px; height: 350px; }
+  }
+  @media (max-width: 990px) {
+    #scene4 .content p { padding-right: 0; }
+    #scene4 .pcard { width: 200px; height: 300px; }
+  }
+  @media (max-width: 950px) {
+    #scene4 main {
+      grid-template-columns: 1fr; grid-template-rows: 4fr 3fr;
+      grid-template-areas: "stacked" "content";
+    }
+    #scene4 .content { grid-area: content; text-align: center; padding: 0 90px; }
+    #scene4 .btn { margin-bottom: 30px; }
+    #scene4 .stack { grid-area: stacked; }
+  }
+  @media (max-width: 650px) {
+    #scene4 main { grid-template-rows: 1fr 1fr; }
+    #scene4 .content { padding: 0 50px; }
+    #scene4 .content h1 { padding-left: 0; }
+    #scene4 .btn { padding: 8px 16px; }
+    #scene4 .pcard { width: 180px; height: 260px; }
+  }
+
+  @media (max-width: 500px) {
+    .moon { width: 70px; height: 70px; right: 8%; }
+    .moon .c1 { width: 20px; height: 20px; top: 14px; right: 14px; }
+    .moon .c2 { width: 7px; height: 7px; top: 31px; right: 35px; }
+    .moon .c3 { width: 10px; height: 10px; top: 42px; right: 17px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="stars"></div>
+<div class="moon"><div class="c1"></div><div class="c2"></div><div class="c3"></div></div>
+<div id="sea"></div>
+
+<canvas id="fx"></canvas>
+<canvas id="text"></canvas>
+
+<div class="gift-wrap" id="giftWrap">
+  <div class="giftbox" id="giftbox">
+    <div class="cover"><div></div></div>
+    <div class="box"></div>
+  </div>
+</div>
+
+<!-- ================== TRANG 3 ================== -->
+<div id="scene3">
+  <div class="container" id="envContainer">
+    <div class="valentines" id="valentines">
+      <div class="envelope"></div>
+      <div class="front"></div>
+      <div class="card">
+        <div class="text"><br><br><br>Chúc em sinh nhật thật là đáng nhớ !!<br>
+Chúc em luôn thành công trên con đường em chọn,<br>
+dù biết chắc là nó rất khó khăn.<br><br>
+Nhưng anh vẫn tin là em sẽ làm được,<br>
+chúc em những ngày tháng về sau không còn vất vả nhiều,<br>
+chúc cho cả sức khoẻ, tinh thần, và những điều tốt đẹp,<br>
+sẽ luôn luôn đến và giúp em mỉm cười.<br><br>
+và chúc mừng sinh nhật em !!! <br>
+Happy birthday My Love🎂🎂🎂🎂</div>
+      </div>
+      <div class="hearts">
+        <div class="one"></div><div class="two"></div><div class="three"></div>
+        <div class="four"></div><div class="five"></div>
+      </div>
+    </div>
+    <div class="shadow"></div>
+  </div>
+  <div class="hint">Chạm vào phong bì ♥</div>
+  <button class="more" id="moreBtn">✨ Chưa hết đâu... bấm vào đây nhé ✨</button>
+</div>
+
+<!-- ================== TRANG 4 ================== -->
+<script>
+/* Ảnh chưa có / bị lỗi thì hiện ô màu tạm */
+function photoFallback(img) {
+  img.onerror = null;
+  var n = parseInt(img.alt.replace(/\D/g, ''), 10) || 1, hue = (n * 55) % 360;
+  var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="350" height="500">' +
+    '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
+    '<stop offset="0" stop-color="hsl(' + hue + ',70%,60%)"/>' +
+    '<stop offset="1" stop-color="hsl(' + (hue + 50) + ',70%,40%)"/></linearGradient></defs>' +
+    '<rect width="350" height="500" fill="url(#g)"/>' +
+    '<text x="175" y="240" font-size="34" text-anchor="middle" fill="#fff" font-family="sans-serif">Ảnh ' + n + '</text>' +
+    '<text x="175" y="285" font-size="16" text-anchor="middle" fill="#fff" font-family="sans-serif">thay bằng ảnh của bạn</text></svg>';
+  img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+}
+</script>
+<div id="scene4">
+  <div class="bg" id="bgA"></div>
+  <div class="bg" id="bgB"></div>
+  <main>
+    <div class="content">
+      <!-- ✏️ SỬA TIÊU ĐỀ + LỜI CHÚC Ở ĐÂY -->
+      <h1>Happy Birthday!</h1>
+      <p>
+        Chúc em sinh nhật thật là đáng nhớ !!<br>
+        Chúc mọi thứ tốt đẹp sẽ thuộc về em, chúc em luôn chọn đúng con đường mà mình đã vạch ra để đi, chúc mọi khó khăn đều sẽ vượt qua được, chúc em luôn bình an và hạnh phúc, chúc em luôn mỉm cười và vui vẻ, chúc em luôn thành công trong mọi việc, chúc em luôn xinh đẹp và rạng rỡ, chúc em luôn gặp được những điều may mắn và tốt lành trong cuộc sống. <br><br>
+        Và rồi cũng nhân dịp này, anh cũng muốn nói cám ơn em đã luôn bên cạnh anh, khi hiện tại anh chưa có gì trong tay cả, nhưng em vẫn luôn ở bên cạnh anh, cám ơn em đã luôn tin tưởng và yêu thương anh, cám ơn em đã luôn là động lực để anh cố gắng hơn nữa, cám ơn em đã luôn là người bạn đồng hành cùng anh trong mọi việc, cám ơn em đã luôn là người mà anh có thể dựa vào khi gặp khó khăn, cám ơn em đã luôn là người mà anh có thể chia sẻ mọi điều trong cuộc sống. <br><br>
+        Anh sẽ luôn cố gắng để trở thành một người tốt hơn, một người mà em có thể tự hào, một người mà em có thể tin tưởng, một người mà em có thể yêu thương, một người mà em có thể dựa vào, một người mà em có thể chia sẻ mọi điều trong cuộc sống. <br><br>
+        Anh biết chắc anh cũng chưa có nhẫn để cầu hôn em, vì mỗi người mỗi suy nghĩ nên anh chọn vòng cổ, vì anh muốn em luôn lấp lánh khi bên cạnh nó, và cũng chứng minh đó là một tình yêu vĩnh cửu,
+        và anh cũng muốn nói rằng, anh sẽ luôn yêu em, và sẽ luôn bên cạnh em, dù có chuyện gì xảy ra đi nữa, anh sẽ luôn là người mà em có thể dựa vào, một người mà em có thể tin tưởng, một người mà em có thể yêu thương, một người mà em có thể chia sẻ mọi điều trong cuộc sống. <br><br>
+        Anh yêu em thật nhiều ❤️, yêu nhiều hơn bất cứ người nào trên thế gian này !!
+      </p>
+    </div>
+
+    <div class="stack" id="stack">
+      <!-- 🖼️ THAY src BẰNG LINK/TÊN FILE ẢNH CỦA BẠN (có thể thêm hoặc bớt thẻ pcard) -->
+      <div class="pcard"><img src="/img/T1.webp" alt="Ảnh 1" onerror="photoFallback(this)"></div>
+      <div class="pcard"><img src="/img/T2.jpg" alt="Ảnh 2" onerror="photoFallback(this)"></div>
+      <div class="pcard"><img src="/img/T3.jpg" alt="Ảnh 3" onerror="photoFallback(this)"></div>
+      <div class="pcard"><img src="/img/T4.jpg" alt="Ảnh 4" onerror="photoFallback(this)"></div>
+      <div class="pcard"><img src="/img/T5.jpg" alt="Ảnh 5" onerror="photoFallback(this)"></div>
+      <div class="pcard"><img src="/img/T6.jpg" alt="Ảnh 6" onerror="photoFallback(this)"></div>
+      <div class="pcard"><img src="/img/T7.jpg" alt="Ảnh 7" onerror="photoFallback(this)"></div>
+    </div>
+  </main>
+</div>
+
+<script>
+/* ================== SAO ================== */
+(function () {
+  var s = document.getElementById('stars');
+  for (var i = 0; i < 70; i++) {
+    var d = document.createElement('div');
+    d.className = 'star';
+    var size = Math.random() * 2 + 1;
+    d.style.width = d.style.height = size + 'px';
+    d.style.left = Math.random() * 100 + '%';
+    d.style.top = Math.random() * 55 + '%';
+    d.style.animationDelay = Math.random() * 3 + 's';
+    s.appendChild(d);
+  }
+})();
+
+/* ================== PHÁO HOA NỀN ================== */
+window.requestAnimFrame = window.requestAnimationFrame || function (cb) { setTimeout(cb, 1000 / 60); };
+
+var fxCanvas = document.getElementById('fx'),
+    fctx = fxCanvas.getContext('2d'),
+    cw = fxCanvas.width = window.innerWidth,
+    ch = fxCanvas.height = window.innerHeight,
+    fireworks = [], particles = [], hue = 120,
+    timerTotal = 80, timerTick = 0, fxRunning = false;
+
+function random(min, max) { return Math.random() * (max - min) + min; }
+function calculateDistance(x1, y1, x2, y2) {
+  return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+}
+
+function Firework(sx, sy, tx, ty) {
+  this.x = sx; this.y = sy; this.sx = sx; this.sy = sy; this.tx = tx; this.ty = ty;
+  this.distanceToTarget = calculateDistance(sx, sy, tx, ty);
+  this.distanceTraveled = 0;
+  this.coordinates = [];
+  var n = 3;
+  while (n--) this.coordinates.push([this.x, this.y]);
+  this.angle = Math.atan2(ty - sy, tx - sx);
+  this.speed = 2; this.acceleration = 1.05;
+  this.brightness = random(50, 70);
+  this.targetRadius = 1;
+}
+Firework.prototype.update = function (index) {
+  this.coordinates.pop();
+  this.coordinates.unshift([this.x, this.y]);
+  this.targetRadius = this.targetRadius < 8 ? this.targetRadius + 0.3 : 1;
+  this.speed *= this.acceleration;
+  var vx = Math.cos(this.angle) * this.speed, vy = Math.sin(this.angle) * this.speed;
+  this.distanceTraveled = calculateDistance(this.sx, this.sy, this.x + vx, this.y + vy);
+  if (this.distanceTraveled >= this.distanceToTarget) {
+    createParticles(this.tx, this.ty);
+    fireworks.splice(index, 1);
+  } else { this.x += vx; this.y += vy; }
+};
+Firework.prototype.draw = function () {
+  fctx.beginPath();
+  var last = this.coordinates[this.coordinates.length - 1];
+  fctx.moveTo(last[0], last[1]);
+  fctx.lineTo(this.x, this.y);
+  fctx.strokeStyle = 'hsl(' + hue + ',100%,' + this.brightness + '%)';
+  fctx.stroke();
+  fctx.beginPath();
+  fctx.arc(this.tx, this.ty, this.targetRadius, 0, Math.PI * 2);
+  fctx.stroke();
+};
+
+function Particle(x, y) {
+  this.x = x; this.y = y;
+  this.coordinates = [];
+  var n = 5;
+  while (n--) this.coordinates.push([this.x, this.y]);
+  this.angle = random(0, Math.PI * 2);
+  this.speed = random(1, 10);
+  this.friction = 0.95; this.gravity = 1;
+  this.hue = random(hue - 20, hue + 20);
+  this.brightness = random(50, 80);
+  this.alpha = 1;
+  this.decay = random(0.015, 0.03);
+}
+Particle.prototype.update = function (index) {
+  this.coordinates.pop();
+  this.coordinates.unshift([this.x, this.y]);
+  this.speed *= this.friction;
+  this.x += Math.cos(this.angle) * this.speed;
+  this.y += Math.sin(this.angle) * this.speed + this.gravity;
+  this.alpha -= this.decay;
+  if (this.alpha <= this.decay) particles.splice(index, 1);
+};
+Particle.prototype.draw = function () {
+  fctx.beginPath();
+  var last = this.coordinates[this.coordinates.length - 1];
+  fctx.moveTo(last[0], last[1]);
+  fctx.lineTo(this.x, this.y);
+  fctx.strokeStyle = 'hsla(' + this.hue + ',100%,' + this.brightness + '%,' + this.alpha + ')';
+  fctx.stroke();
+};
+function createParticles(x, y) {
+  var n = 30;
+  while (n--) particles.push(new Particle(x, y));
+}
+
+function fxLoop() {
+  if (!fxRunning) return;
+  requestAnimFrame(fxLoop);
+  hue += 0.5;
+  fctx.globalCompositeOperation = 'destination-out';
+  fctx.fillStyle = 'rgba(0,0,0,0.5)';
+  fctx.fillRect(0, 0, cw, ch);
+  fctx.globalCompositeOperation = 'lighter';
+  var i = fireworks.length;
+  while (i--) { fireworks[i].draw(); fireworks[i].update(i); }
+  i = particles.length;
+  while (i--) { particles[i].draw(); particles[i].update(i); }
+  if (timerTick >= timerTotal) {
+    fireworks.push(new Firework(cw / 2, ch, random(0, cw), random(0, ch / 2)));
+    timerTick = 0;
+  } else timerTick++;
+}
+
+/* Chạm / click vào màn hình để bắn thêm pháo hoa */
+document.addEventListener('pointerdown', function (e) {
+  if (!fxRunning) return;
+  fireworks.push(new Firework(cw / 2, ch, e.clientX, e.clientY));
+});
+
+/* ================== CHỮ HAPPY BIRTHDAY ================== */
+var c = document.getElementById('text'),
+    w = c.width = window.innerWidth,
+    h = c.height = window.innerHeight,
+    ctx = c.getContext('2d'),
+    hw = w / 2, hh = h / 2,
+    scale = Math.min(1, w / 420),
+    textStarted = false;
+
+var opts = {
+  strings: ['HAPPY', 'BIRTHDAY!', 'MY DARLING' , 'CHU THI TUYET TRINH'],
+  charSize: 30 * scale,
+  charSpacing: 35 * scale,
+  lineHeight: 40 * scale,
+  fireworkPrevPoints: 10,
+  fireworkBaseLineWidth: 5,
+  fireworkAddedLineWidth: 8,
+  fireworkSpawnTime: 100,
+  fireworkBaseReachTime: 30,
+  fireworkAddedReachTime: 30,
+  fireworkCircleBaseSize: 20,
+  fireworkCircleAddedSize: 10,
+  fireworkCircleBaseTime: 30,
+  fireworkCircleAddedTime: 30,
+  fireworkCircleFadeBaseTime: 10,
+  fireworkCircleFadeAddedTime: 5,
+  fireworkBaseShards: 5,
+  fireworkAddedShards: 5,
+  fireworkShardPrevPoints: 3,
+  fireworkShardBaseVel: 4,
+  fireworkShardAddedVel: 2,
+  fireworkShardBaseSize: 3,
+  fireworkShardAddedSize: 3,
+  gravity: .1,
+  upFlow: -.1,
+  letterContemplatingWaitTime: 360,
+  balloonSpawnTime: 20,
+  balloonBaseInflateTime: 10,
+  balloonAddedInflateTime: 10,
+  balloonBaseSize: 20,
+  balloonAddedSize: 20,
+  balloonBaseVel: .4,
+  balloonAddedVel: .4,
+  balloonBaseRadian: -(Math.PI / 2 - .5),
+  balloonAddedRadian: -1
+};
+var calc = { totalWidth: opts.charSpacing * Math.max(opts.strings[0].length, opts.strings[1].length) },
+    Tau = Math.PI * 2, TauQuarter = Tau / 4, letters = [];
+
+ctx.font = opts.charSize + 'px Verdana';
+
+function Letter(char, x, y) {
+  this.char = char; this.x = x; this.y = y;
+  this.dx = -ctx.measureText(char).width / 2;
+  this.dy = +opts.charSize / 2;
+  this.fireworkDy = this.y - hh;
+  var hue = x / calc.totalWidth * 360;
+  this.color = 'hsl(hue,80%,50%)'.replace('hue', hue);
+  this.lightAlphaColor = 'hsla(hue,80%,light%,alp)'.replace('hue', hue);
+  this.lightColor = 'hsl(hue,80%,light%)'.replace('hue', hue);
+  this.alphaColor = 'hsla(hue,80%,50%,alp)'.replace('hue', hue);
+  this.reset();
+}
+Letter.prototype.reset = function () {
+  this.phase = 'firework';
+  this.tick = 0;
+  this.spawned = false;
+  this.spawningTime = opts.fireworkSpawnTime * Math.random() | 0;
+  this.reachTime = opts.fireworkBaseReachTime + opts.fireworkAddedReachTime * Math.random() | 0;
+  this.lineWidth = opts.fireworkBaseLineWidth + opts.fireworkAddedLineWidth * Math.random();
+  this.prevPoints = [[0, hh, 0]];
+};
+Letter.prototype.step = function () {
+  if (this.phase === 'firework') {
+    if (!this.spawned) {
+      ++this.tick;
+      if (this.tick >= this.spawningTime) { this.tick = 0; this.spawned = true; }
+    } else {
+      ++this.tick;
+      var linearProportion = this.tick / this.reachTime,
+          armonicProportion = Math.sin(linearProportion * TauQuarter),
+          x = linearProportion * this.x,
+          y = hh + armonicProportion * this.fireworkDy;
+
+      if (this.prevPoints.length > opts.fireworkPrevPoints) this.prevPoints.shift();
+      this.prevPoints.push([x, y, linearProportion * this.lineWidth]);
+
+      var lineWidthProportion = 1 / (this.prevPoints.length - 1);
+      for (var i = 1; i < this.prevPoints.length; ++i) {
+        var point = this.prevPoints[i], point2 = this.prevPoints[i - 1];
+        ctx.strokeStyle = this.alphaColor.replace('alp', i / this.prevPoints.length);
+        ctx.lineWidth = point[2] * lineWidthProportion * i;
+        ctx.beginPath();
+        ctx.moveTo(point[0], point[1]);
+        ctx.lineTo(point2[0], point2[1]);
+        ctx.stroke();
+      }
+
+      if (this.tick >= this.reachTime) {
+        this.phase = 'contemplate';
+        this.circleFinalSize = opts.fireworkCircleBaseSize + opts.fireworkCircleAddedSize * Math.random();
+        this.circleCompleteTime = opts.fireworkCircleBaseTime + opts.fireworkCircleAddedTime * Math.random() | 0;
+        this.circleCreating = true;
+        this.circleFading = false;
+        this.circleFadeTime = opts.fireworkCircleFadeBaseTime + opts.fireworkCircleFadeAddedTime * Math.random() | 0;
+        this.tick = 0;
+        this.tick2 = 0;
+        this.shards = [];
+
+        var shardCount = opts.fireworkBaseShards + opts.fireworkAddedShards * Math.random() | 0,
+            angle = Tau / shardCount,
+            cos = Math.cos(angle), sin = Math.sin(angle),
+            sx = 1, sy = 0;
+        for (var j = 0; j < shardCount; ++j) {
+          var x1 = sx;
+          sx = sx * cos - sy * sin;
+          sy = sy * cos + x1 * sin;
+          this.shards.push(new Shard(this.x, this.y, sx, sy, this.alphaColor));
+        }
+      }
+    }
+  } else if (this.phase === 'contemplate') {
+    ++this.tick;
+    if (this.circleCreating) {
+      ++this.tick2;
+      var proportion = this.tick2 / this.circleCompleteTime,
+          armonic = -Math.cos(proportion * Math.PI) / 2 + .5;
+      ctx.beginPath();
+      ctx.fillStyle = this.lightAlphaColor.replace('light', 50 + 50 * proportion).replace('alp', proportion);
+      ctx.arc(this.x, this.y, armonic * this.circleFinalSize, 0, Tau);
+      ctx.fill();
+      if (this.tick2 > this.circleCompleteTime) {
+        this.tick2 = 0; this.circleCreating = false; this.circleFading = true;
+      }
+    } else if (this.circleFading) {
+      ctx.fillStyle = this.lightColor.replace('light', 70);
+      ctx.fillText(this.char, this.x + this.dx, this.y + this.dy);
+      ++this.tick2;
+      var p2 = this.tick2 / this.circleFadeTime,
+          a2 = -Math.cos(p2 * Math.PI) / 2 + .5;
+      ctx.beginPath();
+      ctx.fillStyle = this.lightAlphaColor.replace('light', 100).replace('alp', 1 - a2);
+      ctx.arc(this.x, this.y, this.circleFinalSize, 0, Tau);
+      ctx.fill();
+      if (this.tick2 >= this.circleFadeTime) this.circleFading = false;
+    } else {
+      ctx.fillStyle = this.lightColor.replace('light', 70);
+      ctx.fillText(this.char, this.x + this.dx, this.y + this.dy);
+    }
+
+    for (var k = 0; k < this.shards.length; ++k) {
+      this.shards[k].step();
+      if (!this.shards[k].alive) { this.shards.splice(k, 1); --k; }
+    }
+
+    if (this.tick > opts.letterContemplatingWaitTime) {
+      this.phase = 'balloon';
+      this.tick = 0;
+      this.spawning = true;
+      this.spawnTime = opts.balloonSpawnTime * Math.random() | 0;
+      this.inflating = false;
+      this.inflateTime = opts.balloonBaseInflateTime + opts.balloonAddedInflateTime * Math.random() | 0;
+      this.size = opts.balloonBaseSize + opts.balloonAddedSize * Math.random() | 0;
+      var rad = opts.balloonBaseRadian + opts.balloonAddedRadian * Math.random(),
+          vel = opts.balloonBaseVel + opts.balloonAddedVel * Math.random();
+      this.vx = Math.cos(rad) * vel;
+      this.vy = Math.sin(rad) * vel;
+    }
+  } else if (this.phase === 'balloon') {
+    ctx.strokeStyle = this.lightColor.replace('light', 80);
+    if (this.spawning) {
+      ++this.tick;
+      ctx.fillStyle = this.lightColor.replace('light', 70);
+      ctx.fillText(this.char, this.x + this.dx, this.y + this.dy);
+      if (this.tick >= this.spawnTime) { this.tick = 0; this.spawning = false; this.inflating = true; }
+    } else if (this.inflating) {
+      ++this.tick;
+      var pr = this.tick / this.inflateTime,
+          bx = this.cx = this.x,
+          by = this.cy = this.y - this.size * pr;
+      ctx.fillStyle = this.alphaColor.replace('alp', pr);
+      ctx.beginPath();
+      generateBalloonPath(bx, by, this.size * pr);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(bx, by);
+      ctx.lineTo(bx, this.y);
+      ctx.stroke();
+      ctx.fillStyle = this.lightColor.replace('light', 70);
+      ctx.fillText(this.char, this.x + this.dx, this.y + this.dy);
+      if (this.tick >= this.inflateTime) { this.tick = 0; this.inflating = false; }
+    } else {
+      this.cx += this.vx;
+      this.cy += this.vy += opts.upFlow;
+      ctx.fillStyle = this.color;
+      ctx.beginPath();
+      generateBalloonPath(this.cx, this.cy, this.size);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(this.cx, this.cy);
+      ctx.lineTo(this.cx, this.cy + this.size);
+      ctx.stroke();
+      ctx.fillStyle = this.lightColor.replace('light', 70);
+      ctx.fillText(this.char, this.cx + this.dx, this.cy + this.dy + this.size);
+      if (this.cy + this.size < -hh || this.cx < -hw || this.cy > hw) this.phase = 'done';
+    }
+  }
+};
+
+function Shard(x, y, vx, vy, color) {
+  var vel = opts.fireworkShardBaseVel + opts.fireworkShardAddedVel * Math.random();
+  this.vx = vx * vel; this.vy = vy * vel;
+  this.x = x; this.y = y;
+  this.prevPoints = [[x, y]];
+  this.color = color;
+  this.alive = true;
+  this.size = opts.fireworkShardBaseSize + opts.fireworkShardAddedSize * Math.random();
+}
+Shard.prototype.step = function () {
+  this.x += this.vx;
+  this.y += this.vy += opts.gravity;
+  if (this.prevPoints.length > opts.fireworkShardPrevPoints) this.prevPoints.shift();
+  this.prevPoints.push([this.x, this.y]);
+  var lwp = this.size / this.prevPoints.length;
+  for (var k = 0; k < this.prevPoints.length - 1; ++k) {
+    var p = this.prevPoints[k], p2 = this.prevPoints[k + 1];
+    ctx.strokeStyle = this.color.replace('alp', k / this.prevPoints.length);
+    ctx.lineWidth = k * lwp;
+    ctx.beginPath();
+    ctx.moveTo(p[0], p[1]);
+    ctx.lineTo(p2[0], p2[1]);
+    ctx.stroke();
+  }
+  if (this.prevPoints[0][1] > hh) this.alive = false;
+};
+function generateBalloonPath(x, y, size) {
+  ctx.moveTo(x, y);
+  ctx.bezierCurveTo(x - size / 2, y - size / 2, x - size / 4, y - size, x, y - size);
+  ctx.bezierCurveTo(x + size / 4, y - size, x + size / 2, y - size / 2, x, y);
+}
+
+function buildLetters() {
+  letters = [];
+  for (var i = 0; i < opts.strings.length; ++i) {
+    for (var j = 0; j < opts.strings[i].length; ++j) {
+      letters.push(new Letter(
+        opts.strings[i][j],
+        j * opts.charSpacing + opts.charSpacing / 2 - opts.strings[i].length * opts.charSpacing / 2,
+        i * opts.lineHeight + opts.lineHeight / 2 - opts.strings.length * opts.lineHeight / 2
+      ));
+    }
+  }
+}
+buildLetters();
+
+function anim() {
+  requestAnimationFrame(anim);
+  ctx.clearRect(0, 0, w, h);
+  if (!textStarted) return;
+  ctx.translate(hw, hh);
+  var done = true;
+  for (var l = 0; l < letters.length; ++l) {
+    letters[l].step();
+    if (letters[l].phase !== 'done') done = false;
+  }
+  ctx.translate(-hw, -hh);
+  if (done) for (var m = 0; m < letters.length; ++m) letters[m].reset();
+}
+anim();
+
+window.addEventListener('resize', function () {
+  w = c.width = window.innerWidth;
+  h = c.height = window.innerHeight;
+  cw = fxCanvas.width = w;
+  ch = fxCanvas.height = h;
+  hw = w / 2; hh = h / 2;
+  scale = Math.min(1, w / 420);
+  opts.charSize = 30 * scale;
+  opts.charSpacing = 35 * scale;
+  opts.lineHeight = 40 * scale;
+  calc.totalWidth = opts.charSpacing * Math.max(opts.strings[0].length, opts.strings[1].length);
+  ctx.font = opts.charSize + 'px Verdana';
+  buildLetters();
+});
+
+/* ================== HỘP QUÀ ================== */
+(function () {
+  var box = document.getElementById('giftbox'),
+      wrap = document.getElementById('giftWrap'),
+      clicked = false;
+
+  box.addEventListener('click', function () {
+    if (clicked) return;
+    clicked = true;
+    playMusic();
+    box.classList.add('wobble');               // 1. hộp rung lắc
+
+    setTimeout(function () {                     // 2. nắp bay lên, hộp rơi xuống
+      box.classList.remove('wobble');
+      box.classList.add('open');
+    }, 1500);
+
+    setTimeout(function () {                     // 3. hiện chữ + pháo hoa
+      wrap.classList.add('gone');
+      textStarted = true;
+      fxRunning = true;
+      fxLoop();
+
+      // Chữ HAPPY BIRTHDAY! hiện TEXT_DURATION ms rồi chuyển sang trang 3
+      setTimeout(goToScene3, TEXT_DURATION);
+    }, 2200);
+  });
+})();
+
+/* ================== CHUYỂN SANG TRANG 3 ================== */
+var TEXT_DURATION = 10000;   // thời gian hiện chữ (ms) – sửa số này nếu muốn lâu/nhanh hơn
+
+function fitEnvelope() {
+  var el = document.getElementById('envContainer');
+  var s = Math.min(1.5, (window.innerWidth - 24) / 320, (window.innerHeight - 140) / 580);
+  el.style.transform = 'translateY(' + (45 * s) + 'px) scale(' + s + ')';
+}
+function goToScene3() {
+  fitEnvelope();
+  document.getElementById('scene3').classList.add('show');
+  // dừng hiệu ứng trang 2 cho nhẹ máy
+  setTimeout(function () { textStarted = false; fxRunning = false; }, 1300);
+}
+window.addEventListener('resize', fitEnvelope);
+
+/* ================== TRANG 4: ẢNH XẾP CHỒNG ================== */
+var stackReady = false;
+
+/* Nền mờ đổi theo ảnh (2 lớp chồng nhau để chuyển mượt) */
+var bgLayers = [document.getElementById('bgA'), document.getElementById('bgB')],
+    bgActive = 0, currentBgImg = null;
+function bgUrl(img) { return 'url("' + (img.currentSrc || img.src) + '")'; }
+function setBg(img) {
+  if (!img) return;
+  currentBgImg = img;
+  var next = 1 - bgActive;
+  bgLayers[next].style.backgroundImage = bgUrl(img);
+  bgLayers[next].classList.add('on');
+  bgLayers[bgActive].classList.remove('on');
+  bgActive = next;
+}
+function initStack() {
+  if (stackReady) return;
+  stackReady = true;
+
+  var stack = document.getElementById('stack');
+  var cards = Array.from(stack.children).reverse()
+    .filter(function (ch) { return ch.classList.contains('pcard'); });
+  cards.forEach(function (card) { stack.appendChild(card); });
+
+  // ảnh tải xong / đổi sang ảnh tạm thì cập nhật lại nền nếu đó là ảnh đang hiện
+  cards.forEach(function (card) {
+    var img = card.querySelector('img');
+    img.addEventListener('load', function () {
+      if (img === currentBgImg) bgLayers[bgActive].style.backgroundImage = bgUrl(img);
+    });
+  });
+  setBg(stack.lastElementChild.querySelector('img'));
+
+  function moveCard() {
+    var card = stack.lastElementChild;
+    if (!card || !card.classList.contains('pcard') || card.classList.contains('swap')) return;
+    // ảnh kế tiếp sắp lên trên cùng -> đổi nền theo ảnh đó
+    var nextCard = stack.children[stack.children.length - 2];
+    if (nextCard) setBg(nextCard.querySelector('img'));
+    card.classList.add('swap');
+    setTimeout(function () {
+      card.classList.remove('swap');
+      stack.insertBefore(card, stack.firstElementChild);
+    }, 1200);
+  }
+
+  setInterval(moveCard, 4000);                                   // tự chuyển ảnh mỗi 4 giây
+  stack.addEventListener('click', function (e) {                 // click vào ảnh trên cùng
+    var card = e.target.closest('.pcard');
+    if (card && card === stack.lastElementChild) moveCard();
+  });
+}
+
+document.getElementById('moreBtn').addEventListener('click', function () {
+  document.getElementById('scene4').classList.add('show');
+  initStack();
+});
+
+(function () {
+  var cont = document.getElementById('envContainer'),
+      env = document.getElementById('valentines'),
+      lastType = 'mouse';
+  env.addEventListener('pointerdown', function (e) { lastType = e.pointerType; });
+  env.addEventListener('pointerenter', function (e) {
+    if (e.pointerType === 'mouse') cont.classList.add('open');   // máy tính: rê chuột
+  });
+  env.addEventListener('pointerleave', function (e) {
+    if (e.pointerType === 'mouse') cont.classList.remove('open');
+  });
+  env.addEventListener('click', function () {
+    if (lastType !== 'mouse') cont.classList.toggle('open');     // điện thoại: chạm
+  });
+})();
+</script>
+
+<div style="position:fixed; left:-9999px; top:0; width:200px; height:200px;">
+  <div id="ytPlayer"></div>
+</div>
+<script>
+var ytPlayer, ytReady = false, wantPlay = false;
+var MUSIC_ID = 'h53q6iIORhw';
+
+function createPlayer() {
+  if (ytPlayer) return;
+  ytPlayer = new YT.Player('ytPlayer', {
+    width: '200', height: '200',
+    videoId: MUSIC_ID,
+    playerVars: { loop: 1, playlist: MUSIC_ID, controls: 0, playsinline: 1 },
+    events: {
+      onReady: function () {
+        ytReady = true;
+        if (wantPlay) ytPlayer.playVideo();
+      }
+    }
+  });
+}
+window.onYouTubeIframeAPIReady = createPlayer;
+
+function playMusic() {
+  wantPlay = true;
+  if (ytReady) ytPlayer.playVideo();
+}
+</script>
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+if (window.YT && YT.Player) createPlayer();
+</script>
+
+</body>
+</html>
